@@ -1,3 +1,4 @@
+import controllers
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Depends
 from models import Product
@@ -54,57 +55,27 @@ init_db()
 
 @app.get('/products')
 def get_all_products(db : Session = Depends(open_db)):
-    
-    db_products = db.query(db_models.Product).all()
-
-    if not db_products:
-        return "No products found"
-
-    return db_products
+    return controllers.get_all_products(db)
 
 
 @app.get('/products/{id}')
 def get_product_by_id(id : int, db : Session = Depends(open_db)):
-
-    db_product = db.query(db_models.Product).filter(db_models.Product.id == id).first()
-
-    if db_product:
-        return db_product
-    return "Product not found"
+    return controllers.get_product_by_id(id, db)
 
 
 @app.post('/products')
 def add_product(prod: Product, db : Session = Depends(open_db)):
-    db.add(db_models.Product(**prod.model_dump()))
-    db.commit()
-    return prod
+    return controllers.add_product(prod, db)
 
 
 @app.put('/products/{id}')
 def update_product(id : int, prod : Product, db : Session = Depends(open_db)):
-
-    db_product = db.query(db_models.Product).filter(db_models.Product.id == id).first()
-
-    if db_product:
-        db_product.name = prod.name
-        db_product.description = prod.description
-        db_product.price = prod.price
-        db_product.quantity = prod.quantity
-        db.commit()
-        return "Product updated"
-    return "Product Not Found"
+    return controllers.update_product(id, prod, db)
 
 
 @app.delete('/products/{id}')
 def delete_product(id : int, db : Session = Depends(open_db)):
-    
-    db_product = db.query(db_models.Product).filter(db_models.Product.id == id).first()
-
-    if db_product:
-        db.delete(db_product)
-        db.commit()
-        return "Product Deleted Successfully"
-    return "Product not Found"
+    return controllers.delete_product(id, db) 
 
 
 if __name__ == "__main__":
